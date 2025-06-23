@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consignment Inventory Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+    }
+    form, table {
+      max-width: 800px;
+      margin: auto;
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    .actions button {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Consignment Inventory Tracker</h1>
+  <form id="itemForm">
+    <input type="text" id="name" placeholder="Item Name" required />
+    <input type="text" id="consignor" placeholder="Consignor" required />
+    <input type="text" id="category" placeholder="Category" required />
+    <input type="number" id="price" placeholder="Price" required />
+    <select id="status">
+      <option value="Available">Available</option>
+      <option value="Sold">Sold</option>
+      <option value="Returned">Returned</option>
+    </select>
+    <button type="submit">Add Item</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Item Name</th>
+        <th>Consignor</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="inventoryTable"></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('itemForm');
+    const table = document.getElementById('inventoryTable');
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+
+    function saveInventory() {
+      localStorage.setItem('inventory', JSON.stringify(inventory));
+    }
+
+    function renderInventory() {
+      table.innerHTML = '';
+      inventory.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td>${item.consignor}</td>
+          <td>${item.category}</td>
+          <td>$${item.price}</td>
+          <td>${item.status}</td>
+          <td class="actions">
+            <button onclick="editItem(${index})">Edit</button>
+            <button onclick="deleteItem(${index})">Delete</button>
+          </td>
+        `;
+        table.appendChild(row);
+      });
+    }
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const item = {
+        name: form.name.value,
+        consignor: form.consignor.value,
+        category: form.category.value,
+        price: parseFloat(form.price.value).toFixed(2),
+        status: form.status.value
+      };
+      inventory.push(item);
+      saveInventory();
+      renderInventory();
+      form.reset();
+    };
+
+    function editItem(index) {
+      const item = inventory[index];
+      form.name.value = item.name;
+      form.consignor.value = item.consignor;
+      form.category.value = item.category;
+      form.price.value = item.price;
+      form.status.value = item.status;
+      deleteItem(index);
+    }
+
+    function deleteItem(index) {
+      inventory.splice(index, 1);
+      saveInventory();
+      renderInventory();
+    }
+
+    renderInventory();
+  </script>
+</body>
+</html>
